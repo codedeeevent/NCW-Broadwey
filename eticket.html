@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your E-ticket</title>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Libraries -->
+    <script src="https://static.line-scdn.net/liff/edge/versions/2.25.1/sdk.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <!-- Script หลัก -->
+    <script src="eticket.js"></script>
+
+    <style>
+        /* --- ตั้งค่าพื้นฐาน (เหมือนหน้าลงทะเบียน) --- */
+        body {
+            font-family: 'Kanit', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #000;
+            color: #e0e0e0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        /* --- Background Animation --- */
+        .horror-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('bg.jpg'); /* พื้นหลังรูปเดิม */
+            background-size: cover;
+            background-position: center;
+            z-index: -1;
+            /* Animation พื้นหลังเล่น 5 วิ */
+            animation: bgScare 5s ease-in-out forwards; 
+        }
+
+        /* Keyframe สำหรับ Background (ย่อมาจากหน้าลงทะเบียน) */
+        @keyframes bgScare {
+            0% { transform: scale(1); filter: brightness(1); }
+            10% { transform: scale(1.05); filter: brightness(0.6) sepia(1) hue-rotate(-50deg); }
+            45% { transform: scale(1.25) rotate(2deg); filter: invert(1) contrast(2); } /* Flash */
+            50% { filter: brightness(0.5) blur(2px); }
+            100% { transform: scale(1.1); filter: brightness(0.4); }
+        }
+
+        /* --- Stars Effect --- */
+        #stars-container {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 0; pointer-events: none;
+        }
+        .star {
+            position: absolute;
+            background-color: rgba(255, 255, 255, 0.6);
+            border-radius: 50%;
+            animation: twinkle linear infinite;
+        }
+        @keyframes twinkle {
+            0%, 100% { opacity: 0; } 50% { opacity: 1; }
+        }
+
+        /* --- กล่องตั๋ว (Container) --- */
+        .container {
+            background-color: rgba(0, 0, 0, 0.5); /* ดำโปร่งแสง */
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 30px;
+            border-radius: 15px;
+            
+            /* ขอบและเงาธีมเลือด */
+            box-shadow: 0 0 25px rgba(168, 11, 11, 0.4); 
+            border: 2px solid #8a0303;
+            
+            width: 90%;
+            max-width: 380px; /* ให้เล็กกว่าฟอร์มนิดหน่อยเหมือนบัตร */
+            text-align: center;
+            position: relative;
+            z-index: 10;
+            
+            opacity: 0;
+            /* Animation ตอนโผล่มา */
+            animation: ticketGlitch 0.8s steps(10) forwards;
+            animation-delay: 2s; /* ให้ BG เล่นไปก่อน 2 วิ พอ */
+        }
+
+        @keyframes ticketGlitch {
+            0% { opacity: 0; transform: scale(0.8) skewX(20deg); filter: blur(10px); }
+            20% { opacity: 1; filter: hue-rotate(90deg); }
+            40% { opacity: 0.5; transform: translate(-5px, 0); }
+            60% { opacity: 1; transform: translate(5px, 0); }
+            100% { opacity: 1; transform: scale(1); filter: none; }
+        }
+
+        /* หัวข้อ */
+        h1 {
+            color: #ff3333;
+            text-shadow: 2px 2px 4px #000;
+            margin-bottom: 25px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            border-bottom: 1px solid #8a0303;
+            padding-bottom: 10px;
+        }
+
+        /* --- ส่วน QR Code --- */
+        .qr-wrapper {
+            position: relative;
+            display: inline-block;
+            margin-bottom: 20px;
+            padding: 10px;
+            background-color: #fff; /* ต้องเป็นสีขาวเพื่อให้สแกนได้ */
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+        }
+
+        #qrcode {
+            display: block;
+        }
+
+        /* Overlay หมดอายุ */
+        .expired-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0, 0, 0, 0.85); /* พื้นหลังดำเข้ม */
+            display: none;
+            justify-content: center;
+            align-items: center;
+            border-radius: 10px;
+            z-index: 20;
+        }
+
+        .expired-text {
+            color: #ff0000;
+            font-size: 28px;
+            font-weight: bold;
+            text-transform: uppercase;
+            border: 3px solid #ff0000;
+            padding: 5px 15px;
+            transform: rotate(-15deg); /* เอียงเหมือนตราประทับ */
+            text-shadow: 0 0 10px rgba(255, 0, 0, 0.8);
+            letter-spacing: 2px;
+        }
+
+        /* ข้อมูลนิทรรศการ */
+        .info-group {
+            margin-top: 15px;
+            text-align: left;
+            padding: 0 10px;
+        }
+
+        .info-label {
+            color: #ff9999;
+            font-size: 0.9em;
+            margin-bottom: 2px;
+        }
+
+        .info-value {
+            color: #fff;
+            font-size: 1.1em;
+            font-weight: 500;
+            margin-bottom: 10px;
+            text-shadow: 1px 1px 2px #000;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 5px;
+        }
+
+        @media only screen and (max-width: 480px) {
+            .container { width: 85%; padding: 20px; }
+            h1 { font-size: 1.5em; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Background Layers -->
+    <div class="horror-bg"></div>
+    <div id="stars-container"></div>
+
+    <div class="container">
+        <h1>ADMIT ONE</h1>
+        
+        <!-- QR Code Section -->
+        <div class="qr-wrapper">
+            <div id="qrcode"></div>
+            <div class="expired-overlay" id="expired-overlay">
+                <div class="expired-text">EXPIRED</div>
+            </div>
+        </div>
+
+        <!-- Ticket Details -->
+        <div class="info-group">
+            <div class="info-label">Exhibition:</div>
+            <div class="info-value" id="exhibition-name">Loading...</div>
+
+            <div class="info-label">Date:</div>
+            <div class="info-value" id="exhibition-date">Loading...</div>
+
+            <div class="info-label">Time:</div>
+            <div class="info-value" id="exhibition-time-slot">Loading...</div>
+        </div>
+    </div>
+
+    <script>
+        // สร้างดาว (Script เดิมจากหน้าลงทะเบียน)
+        function createStars() {
+            const container = document.getElementById('stars-container');
+            for (let i = 0; i < 40; i++) {
+                const star = document.createElement('div');
+                star.classList.add('star');
+                const size = Math.random() * 3 + 1;
+                star.style.width = `${size}px`;
+                star.style.height = `${size}px`;
+                star.style.left = `${Math.random() * 100}vw`;
+                star.style.top = `${Math.random() * 100}vh`;
+                star.style.animationDuration = `${Math.random() * 2 + 1}s`;
+                container.appendChild(star);
+            }
+        }
+        window.addEventListener('load', createStars);
+    </script>
+</body>
+</html>

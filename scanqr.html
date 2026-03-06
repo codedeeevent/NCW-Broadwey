@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Code Scanner</title>
+    <script src="https://cdn.jsdelivr.net/npm/jsqr/dist/jsQR.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            text-align: center;
+        }
+        
+        /* --- PIN Lock Screen --- */
+        #pin-lock-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+        .pin-container {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+            text-align: center;
+        }
+        .pin-input-container {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .pin-input {
+            width: 50px;
+            height: 60px;
+            font-size: 24px;
+            text-align: center;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            background: #f9f9f9;
+            transition: all 0.3s;
+        }
+        .pin-input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+            outline: none;
+            transform: scale(1.05);
+        }
+        .pin-input.filled {
+            border-color: #4CAF50;
+            background: #f0fff0;
+        }
+        #pin-submit-button {
+            padding: 12px 30px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            background: #667eea;
+            color: white;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+        #pin-submit-button:hover {
+            background: #5a6fd1;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        #pin-error {
+            color: #ff5f6d;
+            height: 20px;
+            margin-top: 10px;
+            font-weight: 600;
+        }
+        h2 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        /* --- Main Scanner Content --- */
+        .main-content {
+            display: none; /* ซ่อนเนื้อหาหลักไว้ก่อน */
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+        .scanner-container {
+            position: relative;
+            width: 90%;
+            max-width: 400px;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            background: white;
+        }
+        #video {
+            width: 100%;
+            height: auto;
+            display: block;
+            border-radius: 15px;
+        }
+        #scannedData {
+            width: 80%;
+            padding: 12px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 8px;
+            text-align: center;
+            margin: 15px;
+            outline: none;
+            color: #333;
+        }
+        button {
+            padding: 12px 20px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            background: #ff5f6d;
+            color: white;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background: #e43f5a;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- PIN Lock Screen -->
+    <div id="pin-lock-screen">
+        <div class="pin-container">
+            <h2>กรุณาใส่ PIN</h2>
+            <div class="pin-input-container">
+                <input type="tel" class="pin-input" maxlength="1" pattern="[0-9]*" inputmode="numeric" data-index="0">
+                <input type="tel" class="pin-input" maxlength="1" pattern="[0-9]*" inputmode="numeric" data-index="1">
+                <input type="tel" class="pin-input" maxlength="1" pattern="[0-9]*" inputmode="numeric" data-index="2">
+                <input type="tel" class="pin-input" maxlength="1" pattern="[0-9]*" inputmode="numeric" data-index="3">
+            </div>
+            <button id="pin-submit-button">เข้าสู่ระบบ</button>
+            <p id="pin-error"></p>
+        </div>
+    </div>
+
+    <!-- Main Scanner Content -->
+    <div class="main-content" id="main-content">
+        <h1>QR Code Scanner</h1>
+        <div class="scanner-container">
+            <video id="video" autoplay playsinline></video>
+        </div>
+        <input type="text" id="scannedData" readonly placeholder="ข้อมูลที่สแกนจะปรากฏที่นี่">
+        <button id="saveButton">บันทึกข้อมูล</button>
+    </div>
+
+    <script>
+        // --- Configuration ---
+        const CORRECT_PIN = "3526"; // <<<<<<< ตั้ง PIN ของคุณที่นี่
+        const SESSION_TIMEOUT = 15 * 60 * 1000; // 15 นาที (15 * 60 วินาที * 1000 มิลลิวินาที)
+        const SCRIPT_URL = 'https://sheetevantdataapi.vercel.app/api/submit';
+        const API_CHECK_URL = 'https://sheetevantdataapi.vercel.app/api/check-duplicate';
+
+        // --- DOM Elements ---
+        const pinLockScreen = document.getElementById('pin-lock-screen');
+        const mainContent = document.getElementById('main-content');
+        const pinInputs = document.querySelectorAll('.pin-input');
+        const pinSubmitButton = document.getElementById('pin-submit-button');
+        const pinError = document.getElementById('pin-error');
+        const video = document.getElementById('video');
+        const scannedDataInput = document.getElementById('scannedData');
+        const saveButton = document.getElementById('saveButton');
+
+        // --- State Variables ---
+        let sessionTimer; // ตัวจับเวลา
+        let lastScannedTime = 0;
+        const scanDelay = 2000; // 2 วินาที
+
+        // --- PIN Logic ---
+        function checkPin() {
+            const enteredPin = Array.from(pinInputs).map(input => input.value).join('');
+            if (enteredPin === CORRECT_PIN) {
+                unlockApp();
+            } else {
+                pinError.textContent = "PIN ไม่ถูกต้อง";
+                pinInputs.forEach(input => {
+                    input.value = "";
+                    input.classList.remove('filled');
+                });
+                pinInputs[0].focus();
+            }
+        }
+
+        function unlockApp() {
+            pinLockScreen.style.display = 'none';
+            mainContent.style.display = 'flex';
+            pinInputs.forEach(input => {
+                input.value = "";
+                input.classList.remove('filled');
+            });
+            pinError.textContent = "";
+            startScanner();
+            resetSessionTimer();
+        }
+
+        function lockApp() {
+            pinLockScreen.style.display = 'flex';
+            mainContent.style.display = 'none';
+            stopScanner();
+            clearTimeout(sessionTimer);
+            pinInputs[0].focus();
+        }
+
+        function resetSessionTimer() {
+            clearTimeout(sessionTimer);
+            sessionTimer = setTimeout(lockApp, SESSION_TIMEOUT);
+        }
+
+        // PIN input handling
+        pinInputs.forEach((input, index) => {
+            // Auto-focus and move between inputs
+            input.addEventListener('input', (e) => {
+                if (input.value.length === 1) {
+                    input.classList.add('filled');
+                    if (index < pinInputs.length - 1) {
+                        pinInputs[index + 1].focus();
+                    }
+                } else {
+                    input.classList.remove('filled');
+                }
+            });
+
+            // Handle backspace
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Backspace' && input.value.length === 0 && index > 0) {
+                    pinInputs[index - 1].focus();
+                }
+            });
+        });
+
+        // Event listeners for PIN
+        pinSubmitButton.addEventListener('click', checkPin);
+        pinInputs.forEach(input => {
+            input.addEventListener('keyup', (event) => {
+                if (event.key === "Enter") {
+                    checkPin();
+                }
+            });
+        });
+
+        // Focus first input on load
+        pinInputs[0].focus();
+
+        // --- Scanner Logic ---
+        async function startScanner() {
+            try {
+                if (video.srcObject) return; // ไม่เริ่มใหม่ถ้ากล้องเปิดอยู่แล้ว
+                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+                video.srcObject = stream;
+                scanQR();
+            } catch (error) {
+                Swal.fire('เกิดข้อผิดพลาด', 'ไม่สามารถเข้าถึงกล้องได้', 'error');
+            }
+        }
+
+        function stopScanner() {
+            if (video.srcObject) {
+                video.srcObject.getTracks().forEach(track => track.stop());
+                video.srcObject = null;
+            }
+        }
+
+        function scanQR() {
+            if (mainContent.style.display === 'none') return; // หยุดสแกนถ้าหน้าจอถูกล็อก
+
+            requestAnimationFrame(scanQR);
+
+            if (video.readyState === video.HAVE_ENOUGH_DATA) {
+                const canvas = document.createElement("canvas");
+                const context = canvas.getContext("2d");
+                canvas.height = video.videoHeight;
+                canvas.width = video.videoWidth;
+                context.drawImage(video, 0, 0, canvas.width, canvas.height);
+                const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+                const code = jsQR(imageData.data, imageData.width, imageData.height, { inversionAttempts: "dontInvert" });
+
+                if (code) {
+                    const currentTime = Date.now();
+                    if (currentTime - lastScannedTime >= scanDelay) {
+                        lastScannedTime = currentTime;
+                        scannedDataInput.value = code.data;
+                        Swal.fire('สแกนสำเร็จ', 'ข้อมูล: ' + code.data, 'success');
+                        resetSessionTimer(); // รีเซ็ตเวลาทุกครั้งที่สแกนสำเร็จ
+                    }
+                }
+            }
+        }
+
+        // --- Data Submission Logic ---
+        saveButton.addEventListener('click', () => {
+            const scannedData = scannedDataInput.value;
+            if (!scannedData) {
+                Swal.fire('ไม่มีข้อมูล', 'กรุณาสแกน QR Code ก่อน', 'warning');
+                return;
+            }
+
+            resetSessionTimer(); // รีเซ็ตเวลาเมื่อมีการกดปุ่ม
+            Swal.fire({ title: 'กำลังตรวจสอบ...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+
+            fetch(API_CHECK_URL)
+                .then(response => {
+                    if (!response.ok) throw new Error('Failed to check duplicates');
+                    return response.json();
+                })
+                .then(data => {
+                    const isDuplicate = data.some(item => item.userId === scannedData);
+                    if (isDuplicate) {
+                        Swal.fire('E-Ticket ถูกใช้แล้ว', '', 'warning');
+                        scannedDataInput.value = '';
+                    } else {
+                        saveScannedData(scannedData);
+                    }
+                })
+                .catch(error => {
+                    console.error(error);
+                    Swal.fire('เกิดข้อผิดพลาด', 'ไม่สามารถตรวจสอบข้อมูลได้', 'error');
+                });
+        });
+
+        function saveScannedData(scannedData) {
+             fetch(SCRIPT_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ scannedData })
+            })
+            .then(response => {
+                if (!response.ok) throw new Error('Failed to save data');
+                return response.json();
+            })
+            .then(() => {
+                Swal.fire('บันทึกสำเร็จ', '', 'success');
+                scannedDataInput.value = '';
+            })
+            .catch(error => {
+                console.error(error);
+                Swal.fire('เกิดข้อผิดพลาด', 'ไม่สามารถบันทึกข้อมูลได้', 'error');
+            });
+        }
+
+        // --- Activity Detection ---
+        // รีเซ็ตเวลาเมื่อมีการคลิกหรือแตะหน้าจอ
+        document.addEventListener('click', resetSessionTimer);
+        document.addEventListener('touchstart', resetSessionTimer);
+
+    </script>
+</body>
+</html>

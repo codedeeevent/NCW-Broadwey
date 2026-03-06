@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NCW Broadwey</title>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <script src="https://static.line-scdn.net/liff/edge/versions/2.25.1/sdk.js"></script>
+    <script src="script.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <style>
+        /* ตั้งค่าพื้นฐาน */
+        body {
+            font-family: 'Kanit', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #000; /* รองพื้นสีดำ */
+            color: #e0e0e0; 
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden; /* ห้ามมี Scrollbar ตอนซูมรูป */
+        }
+
+        /* --- ส่วนจัดการพื้นหลังสยองขวัญ --- */
+        .horror-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('bg.jpg'); /* เปลี่ยนรูปตรงนี้ถ้าใช้ b.png */
+            background-size: cover;
+            background-position: center;
+            z-index: -1; /* ให้อยู่หลังสุด */
+
+            /* Animation พื้นหลัง: เล่น 5 วินาที แล้วหยุดที่สถานะสุดท้าย */
+            animation: bgScare 5s ease-in-out forwards;
+            transform-origin: center center;
+        }
+
+        /* คีย์เฟรม: เอฟเฟกต์หลอกหลอนของพื้นหลัง */
+        @keyframes bgScare {
+            0% {
+                transform: scale(1);
+                filter: brightness(1);
+            }
+            10% {
+                transform: scale(1.05); /* เริ่มซูม */
+                filter: brightness(0.6) sepia(1) hue-rotate(-50deg); /* มืดลง + โทนแดง */
+            }
+            15% {
+                transform: scale(1.05) translate(5px, 5px); /* สั่น */
+            }
+            20% {
+                transform: scale(1.05) translate(-5px, -5px); /* สั่น */
+            }
+            40% {
+                transform: scale(1.2); /* ซูมเข้าไปอีก */
+                filter: brightness(0.3); /* มืดตึ๊ดตื๋อ */
+            }
+            45% {
+                /* จังหวะ Jumpscare (ฟ้าแลบ/ไฟกระพริบ) */
+                transform: scale(1.25) rotate(2deg);
+                filter: invert(1) contrast(2); /* สีกลับด้าน */
+            }
+            48% {
+                filter: none;
+            }
+            50% {
+                filter: brightness(0.5) blur(2px); /* เบลอๆ มึนๆ */
+            }
+            70% {
+                transform: scale(1.1) rotate(-2deg);
+                filter: hue-rotate(90deg) contrast(1.5); /* สีเพี้ยน */
+            }
+            85% {
+                transform: scale(1.15);
+                filter: brightness(0); /* ดับมืดไปแป๊บนึง */
+            }
+            90% {
+                transform: scale(1.05);
+                filter: brightness(1.5); /* สว่างวาบ */
+            }
+            100% {
+                /* จบที่สถานะนิ่งๆ เพื่อให้อ่านฟอร์มรู้เรื่อง */
+                transform: scale(1.1); 
+                filter: brightness(0.4); /* มืดลงเพื่อให้ตัวหนังสือฟอร์มเด่น */
+            }
+        }
+
+        /* --- กล่องฟอร์ม + Animation เข้ามาแบบ Glitch --- */
+        .container {
+            background-color: rgba(0, 0, 0, 0.4); 
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 0 25px rgba(168, 11, 11, 0.4); 
+            border: 1px solid rgba(138, 3, 3, 0.6); 
+            width: 90%;
+            max-width: 450px;
+            position: relative;
+            z-index: 10;
+
+            opacity: 0; 
+            
+            /* รอ 5 วินาที (รอพื้นหลังเล่นจบ) แล้วค่อยโผล่มา */
+            animation: horrorGlitch 0.8s steps(10) forwards;
+            animation-delay: 5s; 
+        }
+
+        /* คีย์เฟรม: ฟอร์มโผล่แบบไฟเสีย */
+        @keyframes horrorGlitch {
+            0% {
+                opacity: 0;
+                transform: scale(0.8) skewX(20deg);
+                filter: brightness(0) blur(10px);
+            }
+            20% { opacity: 0; }
+            30% {
+                opacity: 1;
+                transform: scale(0.95);
+                filter: hue-rotate(90deg); 
+            }
+            40% { opacity: 0.5; transform: translate(-5px, 0); }
+            50% { opacity: 1; transform: translate(5px, 0); filter: none; }
+            60% { opacity: 0.2; }
+            100% {
+                opacity: 1;
+                transform: scale(1) skewX(0);
+                filter: none;
+                border-color: rgba(138, 3, 3, 0.6);
+            }
+        }
+
+        /* Style อื่นๆ เหมือนเดิม */
+        h1 {
+            text-align: center;
+            color: #ff3333; 
+            text-shadow: 2px 2px 4px #000000;
+            margin-bottom: 25px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .profile-image {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            display: block;
+            margin: 0 auto 15px auto;
+            border: 3px solid #8a0303;
+            object-fit: cover;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+        }
+
+        #displayName {
+            display: block;
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+            color: #ffffff;
+            text-shadow: 1px 1px 3px #000;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #ff9999; 
+            font-weight: 500;
+            text-shadow: 1px 1px 2px #000;
+        }
+
+        input[type="text"],
+        input[type="tel"],
+        select {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            background-color: rgba(0, 0, 0, 0.6); 
+            color: #fff;
+            box-sizing: border-box;
+            font-family: 'Kanit', sans-serif;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #ff0000;
+            box-shadow: 0 0 8px rgba(255, 0, 0, 0.4);
+            background-color: rgba(0, 0, 0, 0.8);
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(180deg, #960000 0%, #520000 100%);
+            color: white;
+            border: 1px solid #ff3333;
+            border-radius: 8px;
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 10px;
+            text-shadow: 1px 1px 2px #000;
+        }
+
+        button:hover {
+            background: linear-gradient(180deg, #c40000 0%, #7a0000 100%);
+            box-shadow: 0 0 15px rgba(255, 0, 0, 0.8);
+            transform: scale(1.02);
+        }
+
+        /* เอฟเฟกต์ดาว (ยังเก็บไว้) */
+        #stars-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0; /* อยู่หน้า BG แต่อยู่หลังฟอร์ม */
+            pointer-events: none;
+        }
+
+        .star {
+            position: absolute;
+            background-color: rgba(255, 255, 255, 0.6);
+            border-radius: 50%;
+            animation: twinkle linear infinite;
+        }
+
+        @keyframes twinkle {
+            0% { opacity: 0; transform: scale(0.5); }
+            50% { opacity: 1; transform: scale(1.2); }
+            100% { opacity: 0; transform: scale(0.5); }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                width: 85%;
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- พื้นหลังแยกเลเยอร์ เพื่อทำ Animation -->
+    <div class="horror-bg"></div>
+
+    <!-- เอฟเฟกต์ดาว -->
+    <div id="stars-container"></div>
+    
+    <div class="container" style="display: none;">
+        <form id="eventForm" onsubmit="submitForm(); return false;">
+            <h1>NCW Broadwey</h1>
+            
+            <img id="profileImageDisplay" src="" alt="Profile Image" class="profile-image"><br>
+            
+            <span id="displayName"></span><br>
+
+            <label for="fullName">ชื่อ-นามสกุล:</label>
+            <input type="text" id="fullName" name="fullName" required placeholder="ระบุชื่อ-นามสกุล"><br>
+
+            <label for="phoneNumber">เบอร์โทร:</label>
+            <input type="tel" id="phoneNumber" name="phoneNumber" required placeholder="0xxxxxxxxx"><br>
+
+            <label for="exhibition">เลือกนิทรรศการ:</label>
+            <select id="exhibition" name="exhibition" required>
+                <option value="" disabled selected>กรุณาเลือกนิทรรศการ</option>
+            </select><br>
+
+            <label for="visitDate">เลือกวันที่เข้าชม:</label><br>
+            <select id="visitDate" name="visitDate" required>
+                <option value="" disabled selected>เลือกวันที่เข้าชม</option>
+            </select>
+           <br>
+
+            <label for="visitTime">เลือกรอบการเข้าชม:</label>
+            <select id="visitTime" name="visitTime" required>
+                <option value="" disabled selected>กรุณาเลือกรอบการเข้าชม</option>
+            </select><br>
+
+            <input type="hidden" id="userid" name="userid">
+            <input type="hidden" id="displayname" name="displayname">
+            <input type="hidden" id="profileimage" name="profileimage">
+
+            <button type="submit">ลงทะเบียน</button>
+        </form>
+    </div>
+  
+    <script>
+        function createStars() {
+            const container = document.getElementById('stars-container');
+            const starCount = 50;
+            
+            for (let i = 0; i < starCount; i++) {
+                const star = document.createElement('div');
+                star.classList.add('star');
+                const size = Math.random() * 3 + 1;
+                star.style.width = `${size}px`;
+                star.style.height = `${size}px`;
+                star.style.left = `${Math.random() * 100}vw`;
+                star.style.top = `${Math.random() * 100}vh`;
+                star.style.animationDuration = `${Math.random() * 2 + 1}s`;
+                star.style.animationDelay = `${Math.random() * 2}s`;
+                container.appendChild(star);
+            }
+        }
+        window.addEventListener('load', createStars);
+    </script>
+</body>
+</html>
