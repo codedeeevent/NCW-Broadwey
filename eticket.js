@@ -7,6 +7,60 @@ const IS_DEV_MODE = false;
 
 const API_BASE_URL = "https://sheetevantdataapi.vercel.app/api";
 
+// ==========================================
+// 🎨 เพิ่ม CSS พิเศษสำหรับ SweetAlert2 ให้เข้าธีมด้ายแดง (เหมือนหน้า script.js)
+// ==========================================
+const style = document.createElement('style');
+style.innerHTML = `
+    @keyframes fateHeartbeat {
+        0%, 100% { transform: scale(1); text-shadow: 0 0 10px rgba(214, 48, 49, 0.4); }
+        50% { transform: scale(1.3); text-shadow: 0 0 25px rgba(214, 48, 49, 1); }
+    }
+    @keyframes weaveThread {
+        0% { stroke-dashoffset: 150; opacity: 0; }
+        20% { opacity: 1; }
+        80% { opacity: 1; }
+        100% { stroke-dashoffset: 0; opacity: 0.3; }
+    }
+    .fate-loader-wrapper {
+        position: relative; width: 160px; height: 70px; margin: 20px auto 10px auto; display: flex; justify-content: space-between; align-items: center;
+    }
+    .fate-heart { font-size: 32px; color: #d63031; z-index: 2; animation: fateHeartbeat 1.5s infinite ease-in-out; }
+    .fate-heart.right { animation-delay: 0.75s; }
+    .fate-svg { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 120px; height: 60px; z-index: 1; overflow: visible; }
+    .fate-path { fill: none; stroke: #d63031; stroke-width: 3; stroke-linecap: round; filter: drop-shadow(0 0 6px rgba(214, 48, 49, 0.8)); stroke-dasharray: 150; animation: weaveThread 2s infinite ease-in-out alternate; }
+    
+    .swal-glass-popup {
+        background: rgba(255, 255, 255, 0.9) !important;
+        backdrop-filter: blur(12px) !important;
+        -webkit-backdrop-filter: blur(12px) !important;
+        border-radius: 28px !important;
+        border: 1px solid rgba(255, 255, 255, 1) !important;
+        box-shadow: 0 15px 45px rgba(138, 3, 3, 0.15), inset 0 0 0 2px rgba(255,255,255,0.5) !important;
+        font-family: 'Kanit', sans-serif !important;
+    }
+    .swal2-title { color: #5c0f0f !important; font-size: 1.4em !important; font-weight: 600 !important; }
+    .swal2-html-container { color: #8a7366 !important; margin-top: 5px !important; }
+`;
+document.head.appendChild(style);
+
+const redThreadLoaderHTML = `
+    <div class="fate-loader-wrapper">
+        <div class="fate-heart left">❤</div>
+        <svg class="fate-svg" viewBox="0 0 120 60"><path class="fate-path" d="M 10 30 C 40 -10, 80 70, 110 30" /></svg>
+        <div class="fate-heart right">❤</div>
+    </div>
+`;
+
+// สร้าง Preset ล่วงหน้าสำหรับใช้ซ้ำ
+const themeSwal = Swal.mixin({
+    customClass: { popup: 'swal-glass-popup' },
+    confirmButtonColor: '#d63031',
+    backdrop: `rgba(0, 0, 0, 0.5)`
+});
+
+// ==========================================
+
 function initializeLiff() {
     // 1. เช็คโหมด Dev ก่อน
     if (IS_DEV_MODE) {
@@ -15,20 +69,17 @@ function initializeLiff() {
         return;
     }
 
-    // 2. ถ้าไม่ใช่ Dev Mode ให้รัน LIFF ตามปกติ
-    Swal.fire({
-        title: 'กำลังโหลด',
-        text: 'กำลังสร้าง E-Ticket ของคุณ...',
-        background: '#1a1a1a', // ปรับสี Alert ให้เข้าธีม
-        color: '#fff',
+    // 2. ถ้าไม่ใช่ Dev Mode ให้รัน LIFF ตามปกติ (ใช้ Loading ด้ายแดง)
+    themeSwal.fire({
+        title: 'กำลังตรวจสอบ',
+        html: redThreadLoaderHTML + '<div style="font-size:0.95em;">กำลังดึงข้อมูล E-Ticket ของคุณ...</div>',
         allowOutsideClick: false,
-        didOpen: () => {
-            Swal.showLoading();
-        }
+        showConfirmButton: false
     });
 
+    // ⚠️ ลืมเปลี่ยน liffId เป็นอันใหม่หรือเปล่าครับ? อันนี้อิงตามโค้ดของคุณนะ
     liff.init({
-        liffId: '2007559959-5nxBRkdm'
+        liffId: '2007559959-5nxBRkdm' 
     }).then(() => {
         if (liff.isLoggedIn()) {
             liff.getProfile().then(profile => {
@@ -50,18 +101,18 @@ function initializeLiff() {
 
 // --- ฟังก์ชันจำลองข้อมูล (Dev Mode) ---
 function runDevMode() {
-    // จำลอง User ID และข้อมูลบัตร
+    // อัปเดต Mock Data ให้เป็นธีมใหม่
     const mockUserId = "U_DEV_TICKET_001";
     const mockData = {
-        exhibition: "Lone Wolf: หมาป่าเดียวดาย",
-        date: "06/03/2026", // ลองเปลี่ยนวันที่เพื่อเทส Expired ได้
-        timeSlot: "รอบ (10:00-11:00)" // ลองเปลี่ยนเวลาได้
+        exhibition: "ศรัทธาสุดท้าย นิทรรศการฮีลใจ",
+        date: "28/09/2026", // ลองเปลี่ยนวันที่เพื่อเทส Expired ได้
+        timeSlot: "รอบเช้า (09:00-12:00)" // ลองเปลี่ยนเวลาได้
     };
 
     // จำลองการ delay เหมือนโหลด API
     setTimeout(() => {
         document.getElementById('exhibition-name').textContent = mockData.exhibition;
-        document.getElementById('exhibition-date').textContent = `วันที่: ${mockData.date}`;
+        document.getElementById('exhibition-date').textContent = `${mockData.date}`;
         document.getElementById('exhibition-time-slot').textContent = mockData.timeSlot;
         
         generateQRCode(mockUserId);
@@ -78,16 +129,13 @@ function checkRegistration(userId) {
         .then(userIds => {
             if (userIds.includes(userId)) {
                 fetchExhibitionDetails(userId);
-                generateQRCode(userId);
             } else {
-                Swal.fire({
+                themeSwal.fire({
                     title: 'ไม่พบข้อมูล',
-                    text: 'คุณยังไม่ได้ลงทะเบียน',
+                    text: 'คุณยังไม่ได้ลงทะเบียนเข้าชมนิทรรศการ',
                     icon: 'warning',
-                    background: '#1a1a1a',
-                    color: '#fff',
-                    confirmButtonColor: '#8a0303',
-                    confirmButtonText: 'ตกลง'
+                    iconColor: '#d63031',
+                    confirmButtonText: 'กลับไปลงทะเบียน'
                 }).then(() => {
                     window.location.href = 'index.html';
                 });
@@ -95,12 +143,11 @@ function checkRegistration(userId) {
         })
         .catch(error => {
             console.error('Error fetching userIds:', error);
-            Swal.fire({
+            themeSwal.fire({
                 title: 'เกิดข้อผิดพลาด',
                 text: 'ไม่สามารถตรวจสอบการลงทะเบียนได้',
                 icon: 'error',
-                background: '#1a1a1a',
-                color: '#fff'
+                iconColor: '#d63031'
             }).then(() => {
                 window.location.href = 'index.html';
             });
@@ -121,9 +168,10 @@ function fetchExhibitionDetails(userId) {
                 const formattedDate = formatDate(userData.date);
                 
                 document.getElementById('exhibition-name').textContent = userData.exhibition;
-                document.getElementById('exhibition-date').textContent = `วันที่: ${formattedDate}`;
+                document.getElementById('exhibition-date').textContent = `${formattedDate}`;
                 document.getElementById('exhibition-time-slot').textContent = userData.timeSlot;
                 
+                generateQRCode(userId);
                 checkIfExpired(userData.date, userData.timeSlot);
                 
                 Swal.close();
@@ -133,12 +181,11 @@ function fetchExhibitionDetails(userId) {
         })
         .catch(error => {
             console.error('Error fetching exhibition details:', error);
-            Swal.fire({
+            themeSwal.fire({
                 title: 'เกิดข้อผิดพลาด',
                 text: 'ไม่สามารถดึงข้อมูลบัตรของคุณได้',
                 icon: 'error',
-                background: '#1a1a1a',
-                color: '#fff'
+                iconColor: '#d63031'
             }).then(() => {
                 window.location.href = 'index.html';
             });
@@ -185,6 +232,7 @@ function formatDate(dateString) {
 
 function checkIfExpired(dateString, timeSlotString) {
     try {
+        // ดึงเวลาสิ้นสุดรอบจากข้อความ เช่น "รอบเช้า (09:00-12:00)" -> จะดึง "12:00"
         const endTimeMatch = timeSlotString.match(/(\d{2}:\d{2})(?=\)$)/);
         if (!endTimeMatch) {
             console.error("Could not parse end time:", timeSlotString);
@@ -206,7 +254,7 @@ function checkIfExpired(dateString, timeSlotString) {
 
         if (now > expiryDateTime) {
             const overlay = document.getElementById('expired-overlay');
-            // เปลี่ยนเป็น flex เพื่อให้ตัวหนังสืออยู่กลาง
+            // เปลี่ยนเป็น flex เพื่อให้ตราประทับแสดงกลางจอ
             overlay.style.display = 'flex'; 
         }
 
