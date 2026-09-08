@@ -3,160 +3,106 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Embrace & Heal Exhibition</title>
-    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <title>นิทรรศการฮีลใจ ศรัทธาสุดท้าย</title>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://static.line-scdn.net/liff/edge/versions/2.25.1/sdk.js"></script>
     <script src="script.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <style>
-        /* ตั้งค่าพื้นฐาน */
+        /* ตั้งค่าพื้นฐานใหม่ และเรียกใช้รูปพื้นหลัง bg2.jpeg */
         body {
             font-family: 'Kanit', sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #000; /* รองพื้นสีดำ */
-            color: #e0e0e0; 
+            
+            /* --- ตั้งค่าพื้นหลังเป็นรูปภาพ --- */
+            background-image: url('bg2.jpeg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            background-repeat: no-repeat;
+            
+            /* หากรูป bg2.jpeg สว่าง/มืดไป สามารถเพิ่ม Gradient ทับได้ (ตอนนี้คอมเมนต์ไว้) */
+            /* background: linear-gradient(rgba(255,255,255,0.2), rgba(255,255,255,0.4)), url('bg2.jpeg'); */
+            
+            color: #4a3b32; /* สีข้อความหลักเป็นน้ำตาลเข้ม */
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            overflow: hidden; /* ห้ามมี Scrollbar ตอนซูมรูป */
+            overflow: hidden; 
         }
 
-        /* --- ส่วนจัดการพื้นหลังสยองขวัญ --- */
-        .horror-bg {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image: url('bg.jpg'); /* เปลี่ยนรูปตรงนี้ถ้าใช้ b.png */
-            background-size: cover;
-            background-position: center;
-            z-index: -1; /* ให้อยู่หลังสุด */
-
-            /* Animation พื้นหลัง: เล่น 5 วินาที แล้วหยุดที่สถานะสุดท้าย */
-            animation: bgScare 5s ease-in-out forwards;
-            transform-origin: center center;
-        }
-
-        /* คีย์เฟรม: เอฟเฟกต์หลอกหลอนของพื้นหลัง */
-        @keyframes bgScare {
-            0% {
-                transform: scale(1);
-                filter: brightness(1);
-            }
-            10% {
-                transform: scale(1.05); /* เริ่มซูม */
-                filter: brightness(0.6) sepia(1) hue-rotate(-50deg); /* มืดลง + โทนแดง */
-            }
-            15% {
-                transform: scale(1.05) translate(5px, 5px); /* สั่น */
-            }
-            20% {
-                transform: scale(1.05) translate(-5px, -5px); /* สั่น */
-            }
-            40% {
-                transform: scale(1.2); /* ซูมเข้าไปอีก */
-                filter: brightness(0.3); /* มืดตึ๊ดตื๋อ */
-            }
-            45% {
-                /* จังหวะ Jumpscare (ฟ้าแลบ/ไฟกระพริบ) */
-                transform: scale(1.25) rotate(2deg);
-                filter: invert(1) contrast(2); /* สีกลับด้าน */
-            }
-            48% {
-                filter: none;
-            }
-            50% {
-                filter: brightness(0.5) blur(2px); /* เบลอๆ มึนๆ */
-            }
-            70% {
-                transform: scale(1.1) rotate(-2deg);
-                filter: hue-rotate(90deg) contrast(1.5); /* สีเพี้ยน */
-            }
-            85% {
-                transform: scale(1.15);
-                filter: brightness(0); /* ดับมืดไปแป๊บนึง */
-            }
-            90% {
-                transform: scale(1.05);
-                filter: brightness(1.5); /* สว่างวาบ */
-            }
-            100% {
-                /* จบที่สถานะนิ่งๆ เพื่อให้อ่านฟอร์มรู้เรื่อง */
-                transform: scale(1.1); 
-                filter: brightness(0.4); /* มืดลงเพื่อให้ตัวหนังสือฟอร์มเด่น */
-            }
-        }
-
-        /* --- กล่องฟอร์ม + Animation เข้ามาแบบ Glitch --- */
+        /* --- กล่องฟอร์ม (กระจกฝ้าโปร่งแสง) --- */
         .container {
-            background-color: rgba(0, 0, 0, 0.4); 
-            backdrop-filter: blur(5px);
-            -webkit-backdrop-filter: blur(5px);
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 0 25px rgba(168, 11, 11, 0.4); 
-            border: 1px solid rgba(138, 3, 3, 0.6); 
+            background-color: rgba(255, 255, 255, 0.85); /* สีขาวโปร่งแสง */
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 40px 30px;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(184, 45, 45, 0.15); /* เงาสีแดงอ่อนๆ */
+            border: 1px solid rgba(255, 255, 255, 0.8); 
             width: 90%;
-            max-width: 450px;
+            max-width: 420px;
             position: relative;
             z-index: 10;
-
-            opacity: 0; 
             
-            /* รอ 5 วินาที (รอพื้นหลังเล่นจบ) แล้วค่อยโผล่มา */
-            animation: horrorGlitch 0.8s steps(10) forwards;
-            animation-delay: 5s; 
+            /* อนิเมชันลอยขึ้นมาเบาๆ */
+            opacity: 0;
+            transform: translateY(20px);
+            animation: softFadeIn 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            animation-delay: 0.2s;
         }
 
-        /* คีย์เฟรม: ฟอร์มโผล่แบบไฟเสีย */
-        @keyframes horrorGlitch {
-            0% {
-                opacity: 0;
-                transform: scale(0.8) skewX(20deg);
-                filter: brightness(0) blur(10px);
-            }
-            20% { opacity: 0; }
-            30% {
+        /* เส้นด้ายแดงตกแต่งด้านบนกล่อง */
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60%;
+            height: 4px;
+            background: #d63031;
+            border-radius: 0 0 10px 10px;
+        }
+
+        @keyframes softFadeIn {
+            to {
                 opacity: 1;
-                transform: scale(0.95);
-                filter: hue-rotate(90deg); 
-            }
-            40% { opacity: 0.5; transform: translate(-5px, 0); }
-            50% { opacity: 1; transform: translate(5px, 0); filter: none; }
-            60% { opacity: 0.2; }
-            100% {
-                opacity: 1;
-                transform: scale(1) skewX(0);
-                filter: none;
-                border-color: rgba(138, 3, 3, 0.6);
+                transform: translateY(0);
             }
         }
 
-        /* Style อื่นๆ เหมือนเดิม */
         h1 {
             text-align: center;
-            color: #ff3333; 
-            text-shadow: 2px 2px 4px #000000;
+            color: #5c0f0f; /* สีแดงเข้ม */
+            margin-top: 0;
+            margin-bottom: 5px;
+            font-weight: 600;
+            font-size: 1.8em;
+            letter-spacing: 0.5px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #d63031;
+            font-size: 0.9em;
             margin-bottom: 25px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+            font-weight: 400;
         }
 
         .profile-image {
-            width: 100px;
-            height: 100px;
+            width: 90px;
+            height: 90px;
             border-radius: 50%;
             display: block;
             margin: 0 auto 15px auto;
-            border: 3px solid #8a0303;
+            border: 3px solid #fff;
             object-fit: cover;
-            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.15);
         }
 
         #displayName {
@@ -164,105 +110,106 @@
             text-align: center;
             margin-bottom: 20px;
             font-size: 1.1em;
-            color: #ffffff;
-            text-shadow: 1px 1px 3px #000;
+            font-weight: 500;
+            color: #5c0f0f;
         }
 
         label {
             display: block;
-            margin-bottom: 5px;
-            color: #ff9999; 
+            margin-bottom: 6px;
+            color: #6d544a;
             font-weight: 500;
-            text-shadow: 1px 1px 2px #000;
+            font-size: 0.95em;
         }
 
         input[type="text"],
         input[type="tel"],
         select {
             width: 100%;
-            padding: 12px;
-            margin-bottom: 15px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 8px;
-            background-color: rgba(0, 0, 0, 0.6); 
-            color: #fff;
+            padding: 12px 15px;
+            margin-bottom: 18px;
+            border: 1.5px solid #e2d1c8;
+            border-radius: 10px;
+            background-color: rgba(255, 255, 255, 0.7); /* โปร่งแสงนิดๆ ให้กลืนกับกล่อง */
+            color: #4a3b32;
             box-sizing: border-box;
             font-family: 'Kanit', sans-serif;
+            transition: all 0.3s ease;
+            font-size: 0.95em;
         }
 
         input:focus, select:focus {
             outline: none;
-            border-color: #ff0000;
-            box-shadow: 0 0 8px rgba(255, 0, 0, 0.4);
-            background-color: rgba(0, 0, 0, 0.8);
+            border-color: #d63031;
+            box-shadow: 0 0 0 3px rgba(214, 48, 49, 0.15);
+            background-color: #fff;
         }
 
         button {
             width: 100%;
-            padding: 15px;
-            background: linear-gradient(180deg, #960000 0%, #520000 100%);
+            padding: 14px;
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
             color: white;
-            border: 1px solid #ff3333;
-            border-radius: 8px;
-            font-size: 1.2em;
-            font-weight: bold;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
-            text-transform: uppercase;
             letter-spacing: 1px;
             margin-top: 10px;
-            text-shadow: 1px 1px 2px #000;
+            box-shadow: 0 6px 15px rgba(192, 57, 43, 0.3);
         }
 
         button:hover {
-            background: linear-gradient(180deg, #c40000 0%, #7a0000 100%);
-            box-shadow: 0 0 15px rgba(255, 0, 0, 0.8);
-            transform: scale(1.02);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(192, 57, 43, 0.4);
+            background: linear-gradient(135deg, #f15a4a 0%, #d14233 100%);
         }
 
-        /* เอฟเฟกต์ดาว (ยังเก็บไว้) */
+        /* เอฟเฟกต์แสงละอองอบอุ่น */
         #stars-container {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            z-index: 0; /* อยู่หน้า BG แต่อยู่หลังฟอร์ม */
+            z-index: 0;
             pointer-events: none;
         }
 
-        .star {
+        .mote {
             position: absolute;
-            background-color: rgba(255, 255, 255, 0.6);
+            background-color: rgba(255, 230, 200, 0.6);
             border-radius: 50%;
-            animation: twinkle linear infinite;
+            filter: blur(1px);
+            animation: float linear infinite;
         }
 
-        @keyframes twinkle {
-            0% { opacity: 0; transform: scale(0.5); }
-            50% { opacity: 1; transform: scale(1.2); }
-            100% { opacity: 0; transform: scale(0.5); }
+        @keyframes float {
+            0% { opacity: 0; transform: translateY(0) scale(0.8); }
+            50% { opacity: 1; }
+            100% { opacity: 0; transform: translateY(-50px) scale(1.2); }
         }
 
         @media (max-width: 480px) {
             .container {
                 width: 85%;
-                padding: 20px;
+                padding: 30px 20px;
             }
         }
     </style>
 </head>
 <body>
 
-    <!-- พื้นหลังแยกเลเยอร์ เพื่อทำ Animation -->
-    <div class="horror-bg"></div>
-
-    <!-- เอฟเฟกต์ดาว -->
+    <!-- เอฟเฟกต์ละอองแสง -->
     <div id="stars-container"></div>
     
-    <div class="container" style="display: none;">
+    <div class="container">
         <form id="eventForm" onsubmit="submitForm(); return false;">
-            <h1>NCW Broadwey</h1>
+            <!-- Header ให้ตรงกับโปสเตอร์ -->
+            <h1>ศรัทธาสุดท้าย</h1>
+            <div class="subtitle">นิทรรศการฮีลใจ</div>
             
             <img id="profileImageDisplay" src="" alt="Profile Image" class="profile-image"><br>
             
@@ -279,11 +226,10 @@
                 <option value="" disabled selected>กรุณาเลือกนิทรรศการ</option>
             </select><br>
 
-            <label for="visitDate">เลือกวันที่เข้าชม:</label><br>
+            <label for="visitDate">เลือกวันที่เข้าชม:</label>
             <select id="visitDate" name="visitDate" required>
                 <option value="" disabled selected>เลือกวันที่เข้าชม</option>
-            </select>
-           <br>
+            </select><br>
 
             <label for="visitTime">เลือกรอบการเข้าชม:</label>
             <select id="visitTime" name="visitTime" required>
@@ -299,24 +245,25 @@
     </div>
   
     <script>
-        function createStars() {
+        // ฟังก์ชันสร้างละอองแสง (Dust Motes) ฮีลใจ
+        function createMotes() {
             const container = document.getElementById('stars-container');
-            const starCount = 50;
+            const moteCount = 30; // จำนวนละอองแสง
             
-            for (let i = 0; i < starCount; i++) {
-                const star = document.createElement('div');
-                star.classList.add('star');
-                const size = Math.random() * 3 + 1;
-                star.style.width = `${size}px`;
-                star.style.height = `${size}px`;
-                star.style.left = `${Math.random() * 100}vw`;
-                star.style.top = `${Math.random() * 100}vh`;
-                star.style.animationDuration = `${Math.random() * 2 + 1}s`;
-                star.style.animationDelay = `${Math.random() * 2}s`;
-                container.appendChild(star);
+            for (let i = 0; i < moteCount; i++) {
+                const mote = document.createElement('div');
+                mote.classList.add('mote');
+                const size = Math.random() * 4 + 2; 
+                mote.style.width = `${size}px`;
+                mote.style.height = `${size}px`;
+                mote.style.left = `${Math.random() * 100}vw`;
+                mote.style.top = `${Math.random() * 100}vh`;
+                mote.style.animationDuration = `${Math.random() * 4 + 4}s`; 
+                mote.style.animationDelay = `${Math.random() * 5}s`;
+                container.appendChild(mote);
             }
         }
-        window.addEventListener('load', createStars);
+        window.addEventListener('load', createMotes);
     </script>
 </body>
 </html>
