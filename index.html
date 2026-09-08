@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>นิทรรศการฮีลใจ ศรัทธาสุดท้าย</title>
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<script src="https://static.line-scdn.net/liff/edge/versions/2.25.1/sdk.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script> <!-- ✅ ต้องโหลด Swal ก่อน -->
-<script src="script.js"></script> <!-- ✅ แล้วค่อยโหลดโค้ดของเรา -->
+    <script src="https://static.line-scdn.net/liff/edge/versions/2.25.1/sdk.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script> 
+    <script src="script.js"></script> 
 
     <style>
         /* =========================================
@@ -19,23 +19,22 @@
             margin: 0;
             padding: 0;
             background-color: #f4eae4;
-            /* เพิ่ม Gradient บางๆ ทับรูป เพื่อให้ตัวหนังสือเด่นขึ้นบนมือถือ */
             background-image: linear-gradient(to bottom, rgba(255,255,255,0.3), rgba(230, 200, 190, 0.6)), url('bg2.jpeg');
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
             color: #4a3b32; 
-            min-height: 100svh; /* ใช้ svh สำหรับมือถือ (แก้ปัญหาแถบ URL บัง) */
+            min-height: 100svh; 
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             overflow: hidden; 
-            overscroll-behavior: none; /* กันการดึงหน้าจอรีเฟรชบนมือถือ */
+            overscroll-behavior: none; 
         }
 
         /* =========================================
-           2. ด้ายแดงแห่งโชคชะตา (มีชีวิต & เรืองแสง)
+           2. ด้ายแดงแห่งโชคชะตา นอกกล่อง (Background)
            ========================================= */
         .red-thread-bg {
             position: fixed;
@@ -43,248 +42,200 @@
             z-index: 0; pointer-events: none;
         }
         .red-thread-bg path {
-            fill: none;
-            stroke: #d63031;
-            stroke-width: 3;
-            stroke-linecap: round;
-            /* ทำให้เส้นเรืองแสง */
+            fill: none; stroke: #d63031; stroke-width: 3; stroke-linecap: round;
             filter: drop-shadow(0 0 12px rgba(214, 48, 49, 0.8));
-            stroke-dasharray: 4000;
-            stroke-dashoffset: 4000;
+            stroke-dasharray: 4000; stroke-dashoffset: 4000;
             animation: drawThread 3.5s cubic-bezier(0.25, 1, 0.5, 1) forwards,
                        pulseThread 3s ease-in-out 3.5s infinite alternate;
         }
         .red-thread-bg path:nth-child(2) {
-            animation-delay: 1s, 4.5s; /* หน่วงเวลาเส้นที่สอง */
-            stroke-width: 2;
+            animation-delay: 1s, 4.5s; stroke-width: 2;
             filter: drop-shadow(0 0 8px rgba(214, 48, 49, 0.5));
         }
 
         @keyframes drawThread { to { stroke-dashoffset: 0; } }
-        /* จังหวะเต้นของเส้นด้าย (Heartbeat Glow) */
         @keyframes pulseThread {
             0% { opacity: 0.6; filter: drop-shadow(0 0 5px rgba(214, 48, 49, 0.4)); }
             100% { opacity: 1; filter: drop-shadow(0 0 15px rgba(214, 48, 49, 1)); }
         }
 
         /* =========================================
-           3. กล่องฟอร์ม (Premium Glassmorphism & Cinematic Intro)
+           3. กล่องฟอร์ม (Premium Glassmorphism)
            ========================================= */
         .container {
             background: linear-gradient(135deg, rgba(255, 255, 255, 0.85) 0%, rgba(255, 255, 255, 0.65) 100%);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            padding: 35px 25px;
-            border-radius: 24px;
-            /* เงาสะท้อนขอบกระจกด้านใน และเงาสีแดงด้านนอก */
+            backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+            padding: 35px 25px; border-radius: 24px;
             box-shadow: 0 20px 50px rgba(138, 3, 3, 0.2), 
                         inset 0 0 0 1.5px rgba(255, 255, 255, 0.9),
                         inset 0 20px 20px rgba(255, 255, 255, 0.5);
-            width: 92%;
-            max-width: 420px;
-            position: relative;
-            z-index: 10;
-            
-            /* Cinematic Reveal Animation */
-            opacity: 0;
-            transform: scale(1.1) translateY(30px);
-            filter: blur(10px);
+            width: 92%; max-width: 420px;
+            position: relative; z-index: 10;
+            opacity: 0; transform: scale(1.1) translateY(30px); filter: blur(10px);
             animation: grandReveal 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
             animation-delay: 0.5s;
         }
-
         @keyframes grandReveal {
             to { opacity: 1; transform: scale(1) translateY(0); filter: blur(0); }
         }
 
-        /* หัวข้อ */
+        /* =========================================
+           ✨ 4. เอฟเฟกต์ เส้นด้ายและหัวใจ ภายในกล่อง
+           ========================================= */
+        /* 4.1 เส้นด้ายเชื่อมหัวใจ (เส้นคั่นใต้ชื่อนิทรรศการ) */
+        .heart-thread-divider {
+            display: flex; align-items: center; justify-content: center;
+            margin: -10px 0 25px 0; padding: 0 15px; position: relative; z-index: 3;
+        }
+        .heart-thread-divider .mini-heart {
+            color: #d63031; font-size: 16px;
+            animation: heartbeatBtn 1.5s infinite;
+            text-shadow: 0 0 8px rgba(214,48,49,0.5);
+        }
+        .heart-thread-divider .divider-line {
+            flex-grow: 1; height: 20px; margin: 0 10px; overflow: visible;
+        }
+        .heart-thread-divider path {
+            fill: none; stroke: #d63031; stroke-width: 1.5; stroke-linecap: round;
+            stroke-dasharray: 100; stroke-dashoffset: 100;
+            animation: drawDivider 2s ease-out forwards; animation-delay: 1.2s;
+            filter: drop-shadow(0 0 3px rgba(214,48,49,0.5));
+        }
+        @keyframes drawDivider { to { stroke-dashoffset: 0; } }
+
+        /* 4.2 พื้นหลังเส้นด้าย+หัวใจจางๆ ในกล่อง (Inner Magic) */
+        .inner-bg-magic {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            border-radius: 24px; overflow: hidden; z-index: 0; pointer-events: none;
+        }
+        .inner-bg-magic svg { width: 100%; height: 100%; }
+        .inner-bg-magic path {
+            fill: none; stroke: rgba(214, 48, 49, 0.2); stroke-width: 2;
+            stroke-dasharray: 600; stroke-dashoffset: 600;
+            animation: drawInner 3s ease-in-out forwards; animation-delay: 1s;
+        }
+        .inner-bg-magic .p2 { animation-delay: 1.5s; stroke: rgba(214, 48, 49, 0.15); }
+        @keyframes drawInner { to { stroke-dashoffset: 0; } }
+        
+        .inner-heart-float {
+            position: absolute; color: rgba(214, 48, 49, 0.25);
+            animation: floatInside 4s infinite ease-in-out alternate;
+        }
+        @keyframes floatInside {
+            0% { transform: translateY(0) scale(0.8) rotate(-10deg); }
+            100% { transform: translateY(-20px) scale(1.1) rotate(10deg); opacity: 0.6; }
+        }
+
+        #eventForm { position: relative; z-index: 2; }
+
+
+        /* =========================================
+           5. หัวข้อ และ รูปโปรไฟล์
+           ========================================= */
         h1 {
-            text-align: center;
+            text-align: center; margin: 0 0 5px 0; font-weight: 700; font-size: 2em; letter-spacing: 1px;
             background: linear-gradient(to right, #8a0303, #d63031, #8a0303);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin: 0 0 5px 0;
-            font-weight: 700;
-            font-size: 2em;
-            letter-spacing: 1px;
-            text-shadow: 0 4px 10px rgba(214, 48, 49, 0.2); /* เรืองแสงเบาๆ */
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            text-shadow: 0 4px 10px rgba(214, 48, 49, 0.2); 
         }
         .subtitle {
-            text-align: center;
-            color: #b33939;
-            font-size: 0.95em;
-            margin-bottom: 25px;
-            font-weight: 500;
-            letter-spacing: 0.5px;
+            text-align: center; color: #b33939; font-size: 0.95em; margin-bottom: 20px; font-weight: 500; letter-spacing: 0.5px;
         }
-
-        /* =========================================
-           4. รูปโปรไฟล์มีออร่า (Glowing Aura)
-           ========================================= */
         .profile-wrapper {
-            position: relative;
-            width: 90px;
-            height: 90px;
-            margin: 0 auto 15px auto;
+            position: relative; width: 90px; height: 90px; margin: 0 auto 15px auto; z-index: 3;
         }
         .profile-wrapper::after {
-            content: '';
-            position: absolute;
-            top: -5px; left: -5px; right: -5px; bottom: -5px;
-            border-radius: 50%;
-            background: linear-gradient(45deg, #d63031, #ff9999, #d63031);
-            z-index: -1;
-            filter: blur(10px);
-            animation: spinGlow 4s linear infinite;
+            content: ''; position: absolute; top: -5px; left: -5px; right: -5px; bottom: -5px;
+            border-radius: 50%; background: linear-gradient(45deg, #d63031, #ff9999, #d63031);
+            z-index: -1; filter: blur(10px); animation: spinGlow 4s linear infinite;
         }
         .profile-image {
-            width: 100%; height: 100%;
-            border-radius: 50%;
-            border: 3px solid #fff;
-            object-fit: cover;
-            position: relative;
-            z-index: 2;
+            width: 100%; height: 100%; border-radius: 50%; border: 3px solid #fff; object-fit: cover; position: relative; z-index: 2;
         }
-        @keyframes spinGlow {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
+        @keyframes spinGlow { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        #displayName {
-            display: block;
-            text-align: center;
-            margin-bottom: 20px;
-            font-size: 1.15em;
-            font-weight: 600;
-            color: #5c0f0f;
-        }
+        #displayName { display: block; text-align: center; margin-bottom: 20px; font-size: 1.15em; font-weight: 600; color: #5c0f0f; }
 
         /* =========================================
-           5. ฟอร์มกรอกข้อมูล (สวยหรู ทัชง่าย)
+           6. ฟอร์มกรอกข้อมูล และ ปุ่มกด
            ========================================= */
-        label {
-            display: block;
-            margin-bottom: 6px;
-            color: #8a7366;
-            font-weight: 600;
-            font-size: 0.9em;
-            transform: translateX(5px); /* ขยับนิดนึงให้ดูมีดีไซน์ */
-        }
+        label { display: block; margin-bottom: 6px; color: #8a7366; font-weight: 600; font-size: 0.9em; transform: translateX(5px); }
         input, select {
-            width: 100%;
-            padding: 14px 16px;
-            margin-bottom: 18px;
-            border: none;
-            border-radius: 12px;
-            background-color: rgba(255, 255, 255, 0.6);
-            box-shadow: inset 0 2px 5px rgba(0,0,0,0.05), 0 2px 0 rgba(255,255,255,0.8);
-            color: #4a3b32;
-            font-family: 'Kanit', sans-serif;
-            font-size: 1em;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            width: 100%; padding: 14px 16px; margin-bottom: 18px; border: none; border-radius: 12px;
+            background-color: rgba(255, 255, 255, 0.7); box-shadow: inset 0 2px 5px rgba(0,0,0,0.05), 0 2px 0 rgba(255,255,255,0.8);
+            color: #4a3b32; font-family: 'Kanit', sans-serif; font-size: 1em; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
         input:focus, select:focus {
-            outline: none;
-            background-color: #fff;
-            transform: translateY(-2px); /* ลอยขึ้นตอนพิมพ์ */
+            outline: none; background-color: #fff; transform: translateY(-2px);
             box-shadow: 0 10px 20px rgba(214, 48, 49, 0.15), inset 0 0 0 2px #d63031;
         }
 
-        /* =========================================
-           6. ปุ่มกดเต้นตุบๆ (Heartbeat Button)
-           ========================================= */
         button {
-            width: 100%;
-            padding: 15px;
-            background: linear-gradient(135deg, #d63031 0%, #8a0303 100%);
-            color: white;
-            border: none;
-            border-radius: 12px;
-            font-size: 1.2em;
-            font-weight: 600;
-            cursor: pointer;
-            letter-spacing: 1.5px;
-            margin-top: 10px;
-            box-shadow: 0 8px 25px rgba(214, 48, 49, 0.4);
-            position: relative;
-            overflow: hidden;
-            /* อนิเมชันปุ่มเต้น */
-            animation: heartbeatBtn 2s infinite;
+            width: 100%; padding: 15px; background: linear-gradient(135deg, #d63031 0%, #8a0303 100%);
+            color: white; border: none; border-radius: 12px; font-size: 1.2em; font-weight: 600; cursor: pointer;
+            letter-spacing: 1.5px; margin-top: 10px; box-shadow: 0 8px 25px rgba(214, 48, 49, 0.4);
+            position: relative; overflow: hidden; animation: heartbeatBtn 2s infinite; z-index: 3;
         }
-        /* เอฟเฟกต์แสงวิ่งพาดปุ่ม */
         button::after {
-            content: '';
-            position: absolute;
-            top: 0; left: -100%; width: 50%; height: 100%;
+            content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%;
             background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.3) 50%, rgba(255,255,255,0) 100%);
-            transform: skewX(-25deg);
-            animation: shine 3s infinite;
+            transform: skewX(-25deg); animation: shine 3s infinite;
         }
         @keyframes heartbeatBtn {
             0%, 100% { transform: scale(1); }
             10% { transform: scale(1.02); box-shadow: 0 10px 30px rgba(214, 48, 49, 0.6); }
             20% { transform: scale(1); }
         }
-        @keyframes shine {
-            0% { left: -100%; }
-            20%, 100% { left: 200%; }
-        }
+        @keyframes shine { 0% { left: -100%; } 20%, 100% { left: 200%; } }
 
         /* =========================================
-           7. เอฟเฟกต์ 3D ลอยพริ้ว (ละออง & กลีบดอกไม้)
+           7. เอฟเฟกต์ 3D ลอยพริ้ว (นอกกล่อง)
            ========================================= */
-        #effect-container {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            z-index: 1; pointer-events: none;
-        }
-        .particle {
-            position: absolute;
-            opacity: 0;
-            /* ใช้ translate3d ช่วยให้มือถือประมวลผลลื่นขึ้น */
-            will-change: transform, opacity;
-            animation: floatUp 8s ease-in infinite, sway 3s ease-in-out infinite alternate;
-        }
-        /* แสงละอองอุ่นๆ */
-        .particle.orb {
-            background: radial-gradient(circle, #fff, rgba(255,220,200,0));
-            border-radius: 50%;
-        }
-        /* หัวใจเล็กๆ / กลีบกุหลาบ */
-        .particle.petal {
-            color: rgba(214, 48, 49, 0.7);
-            font-size: 14px;
-            filter: drop-shadow(0 2px 4px rgba(214,48,49,0.3));
-        }
-
-        @keyframes floatUp {
-            0% { opacity: 0; transform: translateY(100vh) scale(0.5); }
-            20% { opacity: 1; }
-            80% { opacity: 1; }
-            100% { opacity: 0; transform: translateY(-10vh) scale(1.2); }
-        }
-        @keyframes sway {
-            0% { transform: translateX(-20px) rotate(-15deg); }
-            100% { transform: translateX(20px) rotate(15deg); }
-        }
+        #effect-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; }
+        .particle { position: absolute; opacity: 0; will-change: transform, opacity; animation: floatUp 8s ease-in infinite, sway 3s ease-in-out infinite alternate; }
+        .particle.orb { background: radial-gradient(circle, #fff, rgba(255,220,200,0)); border-radius: 50%; }
+        .particle.petal { color: rgba(214, 48, 49, 0.7); font-size: 14px; filter: drop-shadow(0 2px 4px rgba(214,48,49,0.3)); }
+        @keyframes floatUp { 0% { opacity: 0; transform: translateY(100vh) scale(0.5); } 20% { opacity: 1; } 80% { opacity: 1; } 100% { opacity: 0; transform: translateY(-10vh) scale(1.2); } }
+        @keyframes sway { 0% { transform: translateX(-20px) rotate(-15deg); } 100% { transform: translateX(20px) rotate(15deg); } }
 
     </style>
 </head>
 <body>
 
-    <!-- พื้นหลังด้ายแดงขยับได้ -->
+    <!-- พื้นหลังด้ายแดงขยับได้ นอกกล่อง -->
     <svg class="red-thread-bg" preserveAspectRatio="none" viewBox="0 0 100 100">
         <path d="M-10,30 C20,90 80,10 110,70" />
         <path d="M-10,70 C30,-10 70,110 110,20" />
     </svg>
 
-    <!-- คอนเทนเนอร์ใส่เอฟเฟกต์ลอยๆ -->
+    <!-- คอนเทนเนอร์ใส่เอฟเฟกต์ลอยๆ นอกกล่อง -->
     <div id="effect-container"></div>
     
-    <div class="container">
+    <div class="container" style="display: none;">
+        
+        <!-- ✨ พื้นหลังเวทมนตร์ภายในกล่อง (เส้นด้ายและหัวใจจางๆ) ✨ -->
+        <div class="inner-bg-magic">
+            <svg preserveAspectRatio="none" viewBox="0 0 200 400">
+                <path d="M -20,80 C 60,-10 140,120 220,60" />
+                <path class="p2" d="M 220,250 C 120,320 80,200 -20,280" />
+            </svg>
+            <div class="inner-heart-float" style="top: 15%; left: 10%; font-size: 24px; animation-delay: 0s;">❤</div>
+            <div class="inner-heart-float" style="top: 40%; right: 10%; font-size: 18px; animation-delay: 1s;">❤</div>
+            <div class="inner-heart-float" style="bottom: 12%; left: 15%; font-size: 32px; animation-delay: 2s;">❤</div>
+        </div>
+
         <form id="eventForm" onsubmit="submitForm(); return false;">
             <h1>ศรัทธาสุดท้าย</h1>
             <div class="subtitle">ความรัก...ที่ผูกด้วยศรัทธา</div>
+
+            <!-- ✨ เส้นด้ายเชื่อมหัวใจ (เป็นตัวคั่นกลาง) ✨ -->
+            <div class="heart-thread-divider">
+                <span class="mini-heart">❤</span>
+                <svg viewBox="0 0 100 20" preserveAspectRatio="none" class="divider-line">
+                    <path d="M 0,10 C 25,25 75,-5 100,10" />
+                </svg>
+                <span class="mini-heart">❤</span>
+            </div>
             
             <!-- ครอบรูปโปรไฟล์เพื่อทำแสงออร่า -->
             <div class="profile-wrapper">
@@ -314,9 +265,9 @@
                 <option value="" disabled selected>กรุณาเลือกรอบการเข้าชม</option>
             </select><br>
 
-            <input type="hidden" id="userid" name="userid">
-            <input type="hidden" id="displayname" name="displayname">
-            <input type="hidden" id="profileimage" name="profileimage">
+            <input type="hidden" id="userid" name="userid" value="">
+            <input type="hidden" id="displayname" name="displayname" value="">
+            <input type="hidden" id="profileimage" name="profileimage" value="">
 
             <button type="submit">ลงทะเบียน</button>
         </form>
@@ -336,18 +287,17 @@
                 orb.style.height = `${size}px`;
                 orb.style.left = `${Math.random() * 100}vw`;
                 
-                // สุ่มระยะเวลาให้ลอยไม่พร้อมกัน
                 let duration = Math.random() * 6 + 6;
                 let delay = Math.random() * 5;
                 orb.style.animation = `floatUp ${duration}s ${delay}s linear infinite, sway ${Math.random()*3+2}s ease-in-out infinite alternate`;
                 container.appendChild(orb);
             }
 
-            // สร้างกลีบดอกไม้/หัวใจ (Petals)
+            // สร้างกลีบดอกไม้/หัวใจ (Petals) นอกกล่อง
             for (let i = 0; i < 10; i++) {
                 let petal = document.createElement('div');
                 petal.className = 'particle petal';
-                petal.innerHTML = '❤'; // หรือใช้สัญลักษณ์กลีบดอกไม้
+                petal.innerHTML = '❤';
                 
                 let size = Math.random() * 12 + 10; 
                 petal.style.fontSize = `${size}px`;
@@ -355,7 +305,6 @@
                 
                 let duration = Math.random() * 7 + 7;
                 let delay = Math.random() * 5;
-                // กลีบดอกไม้จะส่ายกว้างกว่าละอองแสง
                 petal.style.animation = `floatUp ${duration}s ${delay}s ease-in infinite, sway ${Math.random()*2+2}s ease-in-out infinite alternate-reverse`;
                 container.appendChild(petal);
             }
