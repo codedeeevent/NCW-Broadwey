@@ -8,40 +8,100 @@ const IS_DEV_MODE = false;
 const API_BASE_URL = "https://sheetevantdataapi.vercel.app/api";
 
 // ==========================================
-// 🎨 เพิ่ม CSS พิเศษสำหรับ SweetAlert2 ให้เข้าธีม
+// 🎨 เพิ่ม CSS พิเศษสำหรับ SweetAlert2 (ด้ายแดงเชื่อมหัวใจ)
 // ==========================================
 const style = document.createElement('style');
 style.innerHTML = `
-    @keyframes swalHeartbeat {
-        0%, 100% { transform: scale(1); }
-        15%, 45% { transform: scale(1.2); }
-        30% { transform: scale(1); }
+    /* อนิเมชันหัวใจเต้น */
+    @keyframes fateHeartbeat {
+        0%, 100% { transform: scale(1); text-shadow: 0 0 10px rgba(214, 48, 49, 0.4); }
+        50% { transform: scale(1.3); text-shadow: 0 0 25px rgba(214, 48, 49, 1); }
     }
-    .swal-heart-loader {
-        font-size: 60px;
+    
+    /* อนิเมชันด้ายแดงวิ่งถักทอ */
+    @keyframes weaveThread {
+        0% { stroke-dashoffset: 150; opacity: 0; }
+        20% { opacity: 1; }
+        80% { opacity: 1; }
+        100% { stroke-dashoffset: 0; opacity: 0.3; }
+    }
+
+    /* คอนเทนเนอร์หลักของ Loading */
+    .fate-loader-wrapper {
+        position: relative;
+        width: 160px;
+        height: 70px;
+        margin: 20px auto 10px auto;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    /* ตัวหัวใจ */
+    .fate-heart {
+        font-size: 32px;
         color: #d63031;
-        animation: swalHeartbeat 1.5s infinite;
-        text-shadow: 0 0 15px rgba(214,48,49,0.5);
-        margin: 15px 0;
-        line-height: 1;
+        z-index: 2;
+        animation: fateHeartbeat 1.5s infinite ease-in-out;
     }
+    .fate-heart.right {
+        animation-delay: 0.75s; /* ให้หัวใจเต้นสลับจังหวะกัน */
+    }
+
+    /* เส้นด้าย SVG */
+    .fate-svg {
+        position: absolute;
+        top: 50%; left: 50%;
+        transform: translate(-50%, -50%);
+        width: 120px; 
+        height: 60px;
+        z-index: 1;
+        overflow: visible;
+    }
+    .fate-path {
+        fill: none;
+        stroke: #d63031;
+        stroke-width: 3;
+        stroke-linecap: round;
+        filter: drop-shadow(0 0 6px rgba(214, 48, 49, 0.8));
+        stroke-dasharray: 150;
+        /* วิ่งไป-กลับ */
+        animation: weaveThread 2s infinite ease-in-out alternate;
+    }
+
+    /* แต่งกล่อง Popup ให้เป็นกระจกฝ้าหรูๆ */
     .swal-glass-popup {
         background: rgba(255, 255, 255, 0.9) !important;
-        backdrop-filter: blur(10px) !important;
-        -webkit-backdrop-filter: blur(10px) !important;
-        border-radius: 24px !important;
+        backdrop-filter: blur(12px) !important;
+        -webkit-backdrop-filter: blur(12px) !important;
+        border-radius: 28px !important;
         border: 1px solid rgba(255, 255, 255, 1) !important;
-        box-shadow: 0 15px 35px rgba(138, 3, 3, 0.15) !important;
+        box-shadow: 0 15px 45px rgba(138, 3, 3, 0.15), inset 0 0 0 2px rgba(255,255,255,0.5) !important;
         font-family: 'Kanit', sans-serif !important;
     }
     .swal2-title {
         color: #5c0f0f !important;
+        font-size: 1.4em !important;
+        font-weight: 600 !important;
     }
     .swal2-html-container {
         color: #8a7366 !important;
+        margin-top: 5px !important;
     }
 `;
 document.head.appendChild(style);
+
+// โค้ด HTML ของ Loading ด้ายแดง (เก็บไว้ในตัวแปรเพื่อเรียกใช้ง่ายๆ)
+const redThreadLoaderHTML = `
+    <div class="fate-loader-wrapper">
+        <div class="fate-heart left">❤</div>
+        <svg class="fate-svg" viewBox="0 0 120 60">
+            <!-- เส้นโค้งรูปตัว S เชื่อมหัวใจซ้ายไปขวา -->
+            <path class="fate-path" d="M 10 30 C 40 -10, 80 70, 110 30" />
+        </svg>
+        <div class="fate-heart right">❤</div>
+    </div>
+`;
 
 // 🎨 สร้าง Preset ล่วงหน้าสำหรับใช้ซ้ำ
 const themeSwal = Swal.mixin({
@@ -203,10 +263,10 @@ function getUserProfile() {
 }
 
 function checkRegistration(userId) {
-    // 🎨 หน้า Loading ตอนเปิดเว็บครั้งแรก (ใช้หัวใจเต้นแทนวงกลมหมุนๆ)
+    // 🎨 เรียกใช้ Loading ด้ายแดงสุดว้าว ตอนเปิดเว็บ
     themeSwal.fire({
-        title: 'กำลังตรวจสอบสถานะ...',
-        html: '<div class="swal-heart-loader">❤</div><div style="font-size:0.9em;">รอสักครู่นะคะ/ครับ</div>',
+        title: 'กำลังเชื่อมโยงศรัทธา...',
+        html: redThreadLoaderHTML + '<div style="font-size:0.95em;">ตรวจสอบสิทธิ์เข้าชมของคุณ</div>',
         allowOutsideClick: false,
         showConfirmButton: false
     });
@@ -237,10 +297,10 @@ async function submitForm() {
         return;
     }
     
-    // 🎨 หน้า Loading ตอนกดปุ่มลงทะเบียน
+    // 🎨 เรียกใช้ Loading ด้ายแดงสุดว้าว ตอนกดลงทะเบียน
     themeSwal.fire({
-        title: 'กำลังบันทึกข้อมูล...',
-        html: '<div class="swal-heart-loader">❤</div><div style="font-size:0.9em;">กำลังถักทอเส้นด้ายแดงของคุณ...</div>',
+        title: 'ถักทอโชคชะตา...',
+        html: redThreadLoaderHTML + '<div style="font-size:0.95em;">กำลังบันทึกข้อมูลด้ายแดงของคุณ</div>',
         allowOutsideClick: false,
         showConfirmButton: false
     });
@@ -269,12 +329,11 @@ async function submitForm() {
         });
 
         if (response.ok) {
-            // 🎨 Alert ตอนลงทะเบียนสำเร็จ
             themeSwal.fire({
                 title: 'ลงทะเบียนสำเร็จ!',
                 text: 'แล้วพบกันที่นิทรรศการฮีลใจนะคะ/ครับ',
                 icon: 'success',
-                iconColor: '#d63031', // เปลี่ยนเครื่องหมายถูกเป็นสีแดง
+                iconColor: '#d63031',
                 timer: 2500,
                 showConfirmButton: false
             }).then(() => {
@@ -286,7 +345,6 @@ async function submitForm() {
         }
     } catch (error) {
         console.error('Error submitting form:', error);
-        // 🎨 Alert ตอนเกิดข้อผิดพลาด
         themeSwal.fire({
             title: 'เกิดข้อผิดพลาด',
             text: error.message,
