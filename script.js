@@ -7,6 +7,50 @@ const IS_DEV_MODE = false;
 
 const API_BASE_URL = "https://sheetevantdataapi.vercel.app/api";
 
+// ==========================================
+// 🎨 เพิ่ม CSS พิเศษสำหรับ SweetAlert2 ให้เข้าธีม
+// ==========================================
+const style = document.createElement('style');
+style.innerHTML = `
+    @keyframes swalHeartbeat {
+        0%, 100% { transform: scale(1); }
+        15%, 45% { transform: scale(1.2); }
+        30% { transform: scale(1); }
+    }
+    .swal-heart-loader {
+        font-size: 60px;
+        color: #d63031;
+        animation: swalHeartbeat 1.5s infinite;
+        text-shadow: 0 0 15px rgba(214,48,49,0.5);
+        margin: 15px 0;
+        line-height: 1;
+    }
+    .swal-glass-popup {
+        background: rgba(255, 255, 255, 0.9) !important;
+        backdrop-filter: blur(10px) !important;
+        -webkit-backdrop-filter: blur(10px) !important;
+        border-radius: 24px !important;
+        border: 1px solid rgba(255, 255, 255, 1) !important;
+        box-shadow: 0 15px 35px rgba(138, 3, 3, 0.15) !important;
+        font-family: 'Kanit', sans-serif !important;
+    }
+    .swal2-title {
+        color: #5c0f0f !important;
+    }
+    .swal2-html-container {
+        color: #8a7366 !important;
+    }
+`;
+document.head.appendChild(style);
+
+// 🎨 สร้าง Preset ล่วงหน้าสำหรับใช้ซ้ำ
+const themeSwal = Swal.mixin({
+    customClass: { popup: 'swal-glass-popup' },
+    confirmButtonColor: '#d63031',
+    backdrop: `rgba(0, 0, 0, 0.5)`
+});
+
+
 /**
  * ฟังก์ชันทำความสะอาดและจัดมาตรฐานข้อความ
  */
@@ -23,9 +67,13 @@ async function fetchData() {
         populateExhibitions(data);
     } catch (error) {
         console.error("Error fetching exhibition data:", error);
-        // ใน Dev mode อาจจะไม่แสดง Alert รบกวน ถ้าอยากดู UI เฉยๆ
         if (!IS_DEV_MODE) {
-             Swal.fire('เกิดข้อผิดพลาด', 'ไม่สามารถโหลดข้อมูลนิทรรศการได้', 'error');
+             themeSwal.fire({
+                 icon: 'error',
+                 iconColor: '#d63031',
+                 title: 'ขัดข้อง',
+                 text: 'ไม่สามารถโหลดข้อมูลนิทรรศการได้ กรุณาลองใหม่'
+             });
         }
     }
 }
@@ -40,7 +88,6 @@ function populateExhibitions(data) {
         exhibitionSelect.appendChild(opt);
     }
     exhibitionSelect.addEventListener('change', () => {
-        // ตรวจสอบว่ามีข้อมูลหรือไม่ก่อนเรียก populateDates
         if (data[exhibitionSelect.value]) {
             populateDates(data[exhibitionSelect.value]);
             document.getElementById('visitTime').innerHTML = '<option value="" disabled selected>กรุณาเลือกรอบการเข้าชม</option>';
@@ -58,8 +105,6 @@ function populateDates(datesData) {
         dateSelect.appendChild(opt);
     }
     
-    // ลบ Event Listener เก่าออกก่อน (ถ้ามี) เพื่อป้องกันการซ้อนทับ แต่ในที่นี้ใช้วิธีเปลี่ยน innerHTML ก็พอได้
-    // แต่การ addEventListener ซ้ำๆ บน element เดิมอาจมีปัญหา แนะนำให้ใช้ onchange ใน html หรือ logic แบบนี้
     dateSelect.onchange = () => {
         if (datesData[dateSelect.value]) {
             populateTimes(datesData[dateSelect.value]);
@@ -82,8 +127,8 @@ function populateTimes(timeObjects) {
 
         if (normalizeString(slot.status) === "เต็ม") {
             opt.disabled = true;
-            opt.textContent += " (เต็ม)";
-            opt.style.color = "#888"; // เพิ่มสีเทาให้เห็นชัด
+            opt.textContent += " (เต็มแล้ว)";
+            opt.style.color = "#b33939"; // สีแดงหม่น
         }
         
         timeSelect.appendChild(opt);
@@ -96,7 +141,6 @@ document.addEventListener('DOMContentLoaded', fetchData);
 
 // --- ฟังก์ชัน LIFF และการส่งฟอร์ม ---
 function initializeLiff() {
-    // เช็คโหมด Dev ก่อน
     if (IS_DEV_MODE) {
         console.warn("⚠️ Running in Developer Mode: LIFF is skipped.");
         runDevMode();
@@ -113,38 +157,34 @@ function initializeLiff() {
         }
     }).catch(err => {
         console.error('LIFF Initialization failed', err);
-        // กรณี Error แต่ยังอยากให้เห็นฟอร์มตอนเทส
-        Swal.fire('LIFF Error', 'ไม่สามารถเชื่อมต่อ LINE ได้', 'error');
+        themeSwal.fire({
+            icon: 'error',
+            iconColor: '#d63031',
+            title: 'เชื่อมต่อล้มเหลว',
+            text: 'ไม่สามารถเชื่อมต่อระบบ LINE ได้'
+        });
     });
 }
 
-// ฟังก์ชันจำลองข้อมูลสำหรับ Dev Mode
 function runDevMode() {
     const mockProfile = {
         userId: "U_DEV_TEST_001",
         displayName: "Dev User (Test Mode)",
-        pictureUrl: "https://cdn-icons-png.flaticon.com/512/149/149071.png" // รูป Default
+        pictureUrl: "https://cdn-icons-png.flaticon.com/512/149/149071.png"
     };
 
-    // ใส่ข้อมูลจำลองลงในฟอร์ม
     document.getElementById("userid").value = mockProfile.userId;
     document.getElementById("displayname").value = mockProfile.displayName;
     document.getElementById("profileimage").value = mockProfile.pictureUrl;
     
-    // แสดงผลบนหน้าเว็บ
     const profileImg = document.getElementById("profileImageDisplay");
     profileImg.src = mockProfile.pictureUrl;
-    profileImg.style.display = "block"; // บังคับโชว์
+    profileImg.style.display = "block"; 
 
     document.getElementById("displayName").textContent = mockProfile.displayName;
-    
-    // แสดง Container ฟอร์ม
     document.querySelector('.container').style.display = 'block';
 
     console.log("Mock Data Loaded:", mockProfile);
-    
-    // หมายเหตุ: ใน Dev Mode เราจะไม่เรียก checkRegistration() 
-    // เพื่อให้คุณเห็นหน้าฟอร์มเสมอ ไม่โดนเด้งไปหน้า Ticket
 }
 
 function getUserProfile() {
@@ -156,7 +196,6 @@ function getUserProfile() {
         document.getElementById("displayName").textContent = profile.displayName;
         document.querySelector('.container').style.display = 'block';
         
-        // เช็คการลงทะเบียนเฉพาะตอนใช้งานจริง
         checkRegistration(profile.userId);
     }).catch(err => {
         console.error('Error getting profile', err);
@@ -164,10 +203,12 @@ function getUserProfile() {
 }
 
 function checkRegistration(userId) {
-    Swal.fire({
-        title: 'กำลังตรวจสอบการลงทะเบียน...',
+    // 🎨 หน้า Loading ตอนเปิดเว็บครั้งแรก (ใช้หัวใจเต้นแทนวงกลมหมุนๆ)
+    themeSwal.fire({
+        title: 'กำลังตรวจสอบสถานะ...',
+        html: '<div class="swal-heart-loader">❤</div><div style="font-size:0.9em;">รอสักครู่นะคะ/ครับ</div>',
         allowOutsideClick: false,
-        didOpen: () => Swal.showLoading()
+        showConfirmButton: false
     });
     
     fetch(`${API_BASE_URL}/users`)
@@ -178,7 +219,6 @@ function checkRegistration(userId) {
         .then(userIds => {
             if (userIds.includes(userId)) {
                 Swal.close();
-                // ถ้าลงทะเบียนแล้ว ให้เด้งไปหน้าบัตร
                 window.location.href = 'eticket.html';
             } else {
                 Swal.close();
@@ -186,7 +226,7 @@ function checkRegistration(userId) {
         })
         .catch(error => {
             console.error('Error fetching userIds:', error);
-            Swal.fire('เกิดข้อผิดพลาด', 'ไม่สามารถตรวจสอบการลงทะเบียนได้', 'error');
+            themeSwal.fire('ขัดข้อง', 'ไม่สามารถตรวจสอบสถานะได้', 'error');
         });
 }
 
@@ -197,11 +237,12 @@ async function submitForm() {
         return;
     }
     
-    Swal.fire({
-        title: 'กำลังลงทะเบียน',
-        text: 'กรุณารอสักครู่...',
+    // 🎨 หน้า Loading ตอนกดปุ่มลงทะเบียน
+    themeSwal.fire({
+        title: 'กำลังบันทึกข้อมูล...',
+        html: '<div class="swal-heart-loader">❤</div><div style="font-size:0.9em;">กำลังถักทอเส้นด้ายแดงของคุณ...</div>',
         allowOutsideClick: false,
-        didOpen: () => Swal.showLoading()
+        showConfirmButton: false
     });
 
     const formData = {
@@ -216,8 +257,6 @@ async function submitForm() {
         visitTime: document.getElementById("visitTime").value,
     };
 
-    // ใน Dev Mode อาจจะแค่ Alert ข้อมูลออกมาดู ไม่ต้องยิง API จริงก็ได้
-    // แต่ถ้ายิง API จริง ข้อมูลจะเข้าไปใน Sheet เป็นชื่อ Dev User
     console.log("Submitting Data:", formData);
 
     try {
@@ -230,10 +269,13 @@ async function submitForm() {
         });
 
         if (response.ok) {
-            Swal.fire({
+            // 🎨 Alert ตอนลงทะเบียนสำเร็จ
+            themeSwal.fire({
                 title: 'ลงทะเบียนสำเร็จ!',
+                text: 'แล้วพบกันที่นิทรรศการฮีลใจนะคะ/ครับ',
                 icon: 'success',
-                timer: 2000,
+                iconColor: '#d63031', // เปลี่ยนเครื่องหมายถูกเป็นสีแดง
+                timer: 2500,
                 showConfirmButton: false
             }).then(() => {
                 window.location.href = 'eticket.html';
@@ -244,10 +286,12 @@ async function submitForm() {
         }
     } catch (error) {
         console.error('Error submitting form:', error);
-        Swal.fire({
+        // 🎨 Alert ตอนเกิดข้อผิดพลาด
+        themeSwal.fire({
             title: 'เกิดข้อผิดพลาด',
             text: error.message,
-            icon: 'error'
+            icon: 'error',
+            iconColor: '#d63031'
         });
     }
 }
